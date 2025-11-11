@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class CalibrationsTable
 {
@@ -46,6 +47,15 @@ class CalibrationsTable
                         ->icon('heroicon-s-check')->visible(fn($record) => $record->status === CalibrationStatus::pending)
                         ->requiresConfirmation()
                         ->action(function($record){
+
+                            if($record->compartments->count() === 0){
+                                Notification::make()
+                                    ->title('Calibration Error')
+                                    ->color('danger')
+                                    ->body('You must have at least one compartment')->danger()->send();
+                                return;
+                            }
+
                             $record->status = CalibrationStatus::in_progress;
                             $record->save();
                            Notification::make()->title('Calibration Started')->success()->send();

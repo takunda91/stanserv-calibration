@@ -67,6 +67,11 @@ class Calibration extends Model implements Auditable
         return $this->hasMany(CalibrationReading::class);
     }
 
+    public function interpolations(): Calibration|HasMany
+    {
+        return $this->hasMany(CalibrationReadingInterpolation::class);
+    }
+
     public function compartments(): Calibration|HasMany
     {
         return $this->hasMany(CalibrationCompartment::class);

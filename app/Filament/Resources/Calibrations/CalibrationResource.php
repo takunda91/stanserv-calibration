@@ -74,7 +74,7 @@ class CalibrationResource extends Resource
 
     public static function canEdit($record): bool
     {
-       return $record->status == CalibrationStatus::pending;
+       return $record->status === CalibrationStatus::pending;
     }
 
 

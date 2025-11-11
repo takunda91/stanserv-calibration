@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources\Calibrations\Schemas;
 
+use App\Filament\Resources\Calibrations\Pages\CalibrationReadings;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -32,46 +36,103 @@ class CalibrationInfolist
                             Tab::make('Compartments')->icon(Heroicon::BuildingStorefront)
                                 ->badge(fn($record) => $record->compartments->count())
                                 ->schema([
-                                            RepeatableEntry::make('compartments')
-                                                ->hiddenLabel()->columnSpanFull()
-                                                ->schema([
-                                                    TextEntry::make('number')->label('Compartment Number')->numeric(),
-                                                    TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(),
-                                                    TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(),
-                                                ])->columns(3)
-                                    ]),
-                                    Tab::make('Readings')->icon(Heroicon::Calculator)
+                                    RepeatableEntry::make('compartments')
+                                        ->hiddenLabel()->columnSpanFull()
                                         ->schema([
-                                            Section::make('Readings')->visible(fn($record) => $record?->readings)
-                                                ->schema(function ($record) {
-                                                    // Group readings by compartment_no
-                                                    if (!$record) {
-                                                        return [];
-                                                    }
-//                                            return $record->readings
-//                                                ->groupBy('compartment_number')
-//                                                ->map(fn($readings, $compartment) => Section::make("Compartment {$compartment}")
-//                                                    ->collapsible()
-//                                                    ->schema([
-//                                                        RepeatableEntry::make("compartment_{$compartment}_readings")
-//                                                            ->label(false)
-//                                                            ->schema([
-//                                                                TextEntry::make('dip_mm')->label('Dip (mm)'),
-//                                                                TextEntry::make('volume')->label('Volume (L)'),
-//                                                            ])
-//                                                            ->state($readings->toArray())
-//                                                            ->columns(2)
-//                                                    ])
-//                                                )->values()->all();
-                                                }),
-                                        ]),
-                                    Tab::make('Interpolation')->icon(Heroicon::ShieldExclamation)
-                                        ->schema([]),
-                                    Tab::make('Certificate')->icon(Heroicon::Newspaper)
-                                        ->schema([])
-                                ])
-                        ])->columnSpanFull()
-                ]);
+                                            TextEntry::make('number')->label('Compartment Number')->numeric(),
+                                            TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(),
+                                            TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(),
+                                        ])->columns(3)
+                                ]),
+                            Tab::make('Readings')
+                                ->badge(fn($record) => $record->readings->count())
+                                ->badgeColor('warning')
+                                ->icon(Heroicon::Calculator)
+                                ->schema([
+                                    Section::make('Readings [Compartments 1 - 3]')->visible(fn($record) => $record?->readings)
+                                        ->headerActions([
+                                            Action::make('readings')
+                                                ->label('Readings')
+                                                ->icon(Heroicon::Plus)
+                                                ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
+                                        ])
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->schema(function ($record) {
+                                            // Group readings by compartment_no
+                                            if (!$record) {
+                                                return [];
+                                            }
+
+                                            return [Grid::make(3)
+                                            ->schema(
+                                                $record->readings
+                                                    ->groupBy('compartment_number')
+                                                    ->map(fn($readings, $compartment) => Section::make("Compartment  " . $compartment)
+                                                        ->schema([
+                                                            TableRepeatableEntry::make('readings')
+                                                                ->hiddenLabel()
+                                                                ->schema([
+                                                                    TextEntry::make('dip_mm')->alignCenter()->label('Dip (mm)'),
+                                                                    TextEntry::make('volume')->alignCenter()->label('Volume (L)'),
+                                                                ])
+                                                                ->state($readings->toArray())
+                                                                ->columns(2)
+                                                        ])
+                                                    )
+                                                    ->values()
+                                                    ->all()
+                                            )];
+
+                                        }),
+                                ]),
+                            Tab::make('Interpolation')
+                                ->badge(fn($record) => $record->interpolations->count())
+                                ->badgeColor('danger')
+                                ->icon(Heroicon::ShieldExclamation)
+                                ->schema([
+                                    Section::make('Interpolation [Compartments 1 - 3]')->visible(fn($record) => $record?->readings)
+                                        ->headerActions([
+                                            Action::make('readings')
+                                                ->label('Readings')
+                                                ->icon(Heroicon::Plus)
+                                                ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
+                                        ])
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->schema(function ($record) {
+                                            // Group readings by compartment_no
+                                            if (!$record) {
+                                                return [];
+                                            }
+
+                                            return [Grid::make(3)
+                                                ->schema(
+                                                    $record->readings
+                                                        ->groupBy('compartment_number')
+                                                        ->map(fn($readings, $compartment) => Section::make("Compartment  " . $compartment)
+                                                            ->schema([
+                                                                TableRepeatableEntry::make('readings')
+                                                                    ->hiddenLabel()
+                                                                    ->schema([
+                                                                        TextEntry::make('dip_mm')->alignCenter()->label('Dip (mm)'),
+                                                                        TextEntry::make('volume')->alignCenter()->label('Volume (L)'),
+                                                                    ])
+                                                                    ->state($readings->toArray())
+                                                                    ->columns(2)
+                                                            ])
+                                                        )
+                                                        ->values()
+                                                        ->all()
+                                                )];
+
+                                        }),
+                                ]),
+                            Tab::make('Certificate')->icon(Heroicon::Newspaper)
+                                ->schema([])
+                        ])
+                ])->columnSpanFull()
+            ]);
     }
 
     protected static function buildHeader(): array
