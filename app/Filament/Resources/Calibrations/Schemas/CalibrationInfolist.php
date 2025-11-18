@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\Calibrations\Schemas;
 
 use App\Filament\Resources\Calibrations\Pages\CalibrationReadings;
+use App\Services\InterpolationService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -53,6 +55,7 @@ class CalibrationInfolist
                                         ->headerActions([
                                             Action::make('readings')
                                                 ->label('Readings')
+                                                ->color('info')
                                                 ->icon(Heroicon::Plus)
                                                 ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
                                         ])
@@ -64,26 +67,39 @@ class CalibrationInfolist
                                                 return [];
                                             }
 
-                                            return [Grid::make(3)
-                                            ->schema(
-                                                $record->readings
-                                                    ->groupBy('compartment_number')
-                                                    ->map(fn($readings, $compartment) => Section::make("Compartment  " . $compartment)
-                                                        ->schema([
-                                                            TableRepeatableEntry::make('readings')
-                                                                ->hiddenLabel()
-                                                                ->schema([
-                                                                    TextEntry::make('dip_mm')->alignCenter()->label('Dip (mm)'),
-                                                                    TextEntry::make('volume')->alignCenter()->label('Volume (L)'),
-                                                                ])
-                                                                ->state($readings->toArray())
-                                                                ->columns(2)
-                                                        ])
-                                                    )
-                                                    ->values()
-                                                    ->all()
-                                            )];
+                                            $compartments = $record->readings
+                                                ->groupBy('compartment_number')
+                                                ->sortKeys();
 
+                                            return [
+                                                Section::make()
+                                                    ->headerActions([
+                                                        Action::make('openReadingsPage')
+                                                            ->label('Manage Readings')
+                                                            ->color('info')
+                                                            ->icon(Heroicon::ArrowRight)
+                                                            ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record])),
+                                                    ])
+                                                    ->schema([
+                                                        Grid::make()
+                                                            ->columns(2) // auto-expand, safe default
+                                                            ->schema(
+                                                                $compartments->map(function ($readings, $compartment) {
+
+                                                                    return Section::make("Compartment {$compartment}")
+                                                                        ->collapsible()
+                                                                        ->collapsed()
+                                                                        ->schema([
+                                                                            ViewEntry::make("compartment_{$compartment}_readings")
+                                                                                ->view('filament.resources.calibrations.pages.readings-table')
+                                                                                ->viewData([
+                                                                                    'readings' => $readings,
+                                                                                ])
+                                                                        ]);
+                                                                })->values()->all()
+                                                            )
+                                                    ])
+                                            ];
                                         }),
                                 ]),
                             Tab::make('Interpolation')
@@ -93,10 +109,13 @@ class CalibrationInfolist
                                 ->schema([
                                     Section::make('Interpolation [Compartments 1 - 3]')->visible(fn($record) => $record?->readings)
                                         ->headerActions([
-                                            Action::make('readings')
-                                                ->label('Readings')
+                                            Action::make('interpolation')
+                                                ->label('Run Interpolation')
                                                 ->icon(Heroicon::Plus)
-                                                ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
+                                                ->action(function () {
+                                                    $interpolationService = new InterpolationService();
+                                                    dd($interpolationService->processInterpolation(3, 1));
+                                                })
                                         ])
                                         ->collapsible()
                                         ->collapsed()
