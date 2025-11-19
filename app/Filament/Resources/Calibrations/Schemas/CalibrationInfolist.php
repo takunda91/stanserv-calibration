@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Calibrations\Schemas;
 
+use App\Exports\CalibrationInterpolationExport;
 use App\Filament\Resources\Calibrations\Pages\CalibrationReadings;
 use App\Services\InterpolationService;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -20,7 +20,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CalibrationInfolist
 {
@@ -235,6 +235,18 @@ class CalibrationInfolist
             });
     }
 
+    public static function exportInterpolations(): Action
+    {
+        return Action::make('exportInterpolations')
+            ->label('Export Interpolations')
+            ->color('primary')
+            ->visible(fn($record) => $record->interpolations()->count() > 0)
+            ->icon(Heroicon::OutlinedArrowDownTray)
+            ->action(function ($record) {
+               return Excel::download(new CalibrationInterpolationExport($record), 'interpolation.xlsx');
+            });
+    }
+
 
     /**
      * @return Section
@@ -289,7 +301,8 @@ class CalibrationInfolist
     {
         return Section::make('Interpolations')->visible(fn($record) => $record?->readings)
             ->headerActions([
-                self::calculateInterpolations()
+                self::calculateInterpolations(),
+                self::exportInterpolations()
             ])
             ->collapsible()
             ->schema(function ($record) {

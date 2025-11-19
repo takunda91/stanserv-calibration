@@ -16,6 +16,9 @@ class CompartmentInterpolationAveragesChart extends ChartWidget
     {
 
         $compartment = CalibrationCompartment::findOrFail($this->compartmentId);
+        if (is_null($compartment)) {
+            return [];
+        }
 
         $readings = CalibrationReadingInterpolation::where('compartment_number', $compartment->number)
             ->where('calibration_id', $compartment->calibration_id)
