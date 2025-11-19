@@ -88,7 +88,6 @@ class CalibrationReadings extends Page
                                                 ->numeric()
                                                 ->required(),
                                         ])
-                                        ->minItems(1)
                                         ->columns(2)
                                         ->addActionLabel('Add Reading'),
                                 ]);

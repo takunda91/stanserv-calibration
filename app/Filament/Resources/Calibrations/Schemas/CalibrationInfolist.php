@@ -10,6 +10,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
@@ -42,123 +43,30 @@ class CalibrationInfolist
                                     RepeatableEntry::make('compartments')
                                         ->hiddenLabel()->columnSpanFull()
                                         ->schema([
-                                            TextEntry::make('number')->label('Compartment Number')->numeric(),
+                                            TextEntry::make('number')->label('Compartment #')->numeric(),
                                             TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(),
                                             TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(),
+                                            IconEntry::make('is_updated')->label('Readings Processed')->state(fn($record) => $record->is_read_same_as_interpolated)->boolean(),
                                             Actions::make([
-                                                Action::make('viewReadings')
-                                                    ->label('View All Readings')
-                                                    ->icon('heroicon-o-eye')
-                                                    ->modalHeading(fn($record) => "Compartment {$record->number} - Calibration Readings")
-                                                    ->modalContent(fn($record) => view('filament.resources.calibrations.pages.readings-table', [
-                                                        'compartment' => $record,
-                                                        'readings' => $record->readings()->orderBy('volume')->get(),
-                                                    ]))
-                                                    ->modalWidth('7xl')
-                                                    ->slideOver(),
-                                            ])
-                                        ])->columns(4)
+                                                self::generateReadingsAction(),
+                                                self::generateInterpolationsAction(),
+                                                self::generateInterpolationChartFlow()
+                                            ])->visible(fn($record) => $record->readings->count() > 0),
+                                        ])->columns(5)
                                 ]),
                             Tab::make('Readings')
                                 ->badge(fn($record) => $record->readings->count())
                                 ->badgeColor('warning')
                                 ->icon(Heroicon::Calculator)
                                 ->schema([
-                                    Section::make('Readings [Compartments 1 - 3]')->visible(fn($record) => $record?->readings)
-                                        ->headerActions([
-                                            Action::make('readings')
-                                                ->label('Readings')
-                                                ->color('info')
-                                                ->icon(Heroicon::Plus)
-                                                ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
-                                        ])
-                                        ->collapsible()
-                                        ->collapsed()
-                                        ->schema(function ($record) {
-                                            // Group readings by compartment_no
-                                            if (!$record) {
-                                                return [];
-                                            }
-
-                                            $compartments = $record->readings
-                                                ->groupBy('compartment_number')
-                                                ->sortKeys();
-
-                                            return [
-                                                Section::make()
-                                                    ->headerActions([
-                                                        Action::make('openReadingsPage')
-                                                            ->label('Manage Readings')
-                                                            ->color('info')
-                                                            ->icon(Heroicon::ArrowRight)
-                                                            ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record])),
-                                                    ])
-                                                    ->schema([
-                                                        Grid::make()
-                                                            ->columns(2) // auto-expand, safe default
-                                                            ->schema(
-                                                                $compartments->map(function ($readings, $compartment) {
-
-                                                                    return Section::make("Compartment {$compartment}")
-                                                                        ->collapsible()
-                                                                        ->collapsed()
-                                                                        ->schema([
-                                                                            ViewEntry::make("compartment_{$compartment}_readings")
-                                                                                ->view('filament.resources.calibrations.pages.readings-table')
-                                                                                ->viewData([
-                                                                                    'readings' => $readings,
-                                                                                ])
-                                                                        ]);
-                                                                })->values()->all()
-                                                            )
-                                                    ])
-                                            ];
-                                        }),
+                                    self::readingsTabData()
                                 ]),
                             Tab::make('Interpolation')
                                 ->badge(fn($record) => $record->interpolations->count())
                                 ->badgeColor('danger')
                                 ->icon(Heroicon::ShieldExclamation)
                                 ->schema([
-                                    Section::make('Interpolation [Compartments 1 - 3]')->visible(fn($record) => $record?->readings)
-                                        ->headerActions([
-                                            Action::make('interpolation')
-                                                ->label('Run Interpolation')
-                                                ->icon(Heroicon::Plus)
-                                                ->action(function () {
-                                                    $interpolationService = new InterpolationService();
-                                                    dd($interpolationService->processInterpolation(3, 1));
-                                                })
-                                        ])
-                                        ->collapsible()
-                                        ->collapsed()
-                                        ->schema(function ($record) {
-                                            // Group readings by compartment_no
-                                            if (!$record) {
-                                                return [];
-                                            }
-
-                                            return [Grid::make(3)
-                                                ->schema(
-                                                    $record->readings
-                                                        ->groupBy('compartment_number')
-                                                        ->map(fn($readings, $compartment) => Section::make("Compartment  " . $compartment)
-                                                            ->schema([
-                                                                TableRepeatableEntry::make('readings')
-                                                                    ->hiddenLabel()
-                                                                    ->schema([
-                                                                        TextEntry::make('dip_mm')->alignCenter()->label('Dip (mm)'),
-                                                                        TextEntry::make('volume')->alignCenter()->label('Volume (L)'),
-                                                                    ])
-                                                                    ->state($readings->toArray())
-                                                                    ->columns(2)
-                                                            ])
-                                                        )
-                                                        ->values()
-                                                        ->all()
-                                                )];
-
-                                        }),
+                                    self::interpolationTabData(),
                                 ]),
                             Tab::make('Certificate')->icon(Heroicon::Newspaper)
                                 ->schema([])
@@ -249,4 +157,172 @@ class CalibrationInfolist
                 ->columns(4)->compact()
         ];
     }
+
+    /**
+     * @return Action
+     */
+    public static function generateReadingsAction(): Action
+    {
+        return Action::make('viewReadings')
+            ->label(fn($record) => (string)($record->readings->count()))
+            ->icon(Heroicon::OutlinedCalculator)
+            ->tooltip('View Readings')
+            ->modalHeading(fn($record) => "Compartment {$record->number} - Calibration Readings")
+            ->modalContent(fn($record) => view('filament.resources.calibrations.pages.readings-table', [
+                'compartment' => $record,
+                'readings' => $record->readings()->orderBy('volume')->get(),
+                'hasWidget' => true
+            ]))->modalSubmitAction(false)
+            ->slideOver();
+    }
+
+    public static function generateInterpolationsAction(): Action
+    {
+        return Action::make('viewInterpolations')
+            ->label(fn($record) => (string)($record->interpolations->count()))
+            ->icon(Heroicon::OutlinedShieldExclamation)
+            ->tooltip('View Interpolations')
+            ->modalHeading(fn($record) => "Compartment {$record->number} - Interpolations")
+            ->modalContent(fn($record) => view('filament.resources.calibrations.pages.interpolations-table', [
+                'compartment' => $record,
+                'interpolations' => $record->interpolations()->orderBy('volume')->get(),
+                'manual' => $record->readings(),
+                'hasWidget' => true
+            ]))->modalSubmitAction(false)
+            ->slideOver();
+    }
+
+    private static function generateInterpolationChartFlow(): Action
+    {
+        return Action::make('interpolationChartFlow')
+            ->label(fn($record) => (string)($record->interpolations->count()))
+            ->icon(Heroicon::OutlinedChartPie)
+            ->tooltip('View Interpolations Flow')
+            ->color('success')
+            ->modalHeading(fn($record) => "Compartment {$record->number} - Line Flow")
+            ->modalContent(fn($record) => view('filament.compartment-interpolation-chart', [
+                'compartment' => $record,
+            ]))->modalSubmitAction(false)
+            ->modalWidth('7xl')
+            ->slideOver();
+    }
+
+    /**
+     * @return Action
+     */
+    public static function calculateInterpolations(): Action
+    {
+        return Action::make('interpolation')
+            ->label('Run Interpolation')
+            ->color('success')
+            ->visible(fn($record) => $record->readings()->count() > 0)
+            ->icon(Heroicon::Plus)
+            ->action(function ($record) {
+
+                $record->interpolations()->delete();
+
+                foreach ($record->compartments as $compartment) {
+                    $interpolationService = new InterpolationService();
+                    $interpolationService->processInterpolation($record->id, $compartment->number);
+                }
+
+                Notification::make('Interpolation_processed')
+                    ->title('Interpolation Processed')
+                    ->body('Interpolation Processed successfully.')
+                    ->success()
+                    ->send();
+
+            });
+    }
+
+
+    /**
+     * @return Section
+     */
+    public static function readingsTabData(): Section
+    {
+        return Section::make('Readings')
+            ->headerActions([
+                Action::make('readings')
+                    ->label('Readings')
+                    ->color('info')
+                    ->visible(fn($record) => $record->readings->count() > 0)
+                    ->icon(Heroicon::Plus)
+                    ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
+            ])
+            ->collapsible()
+            ->schema(function ($record) {
+                // Group readings by compartment_no
+                if (!$record) {
+                    return [];
+                }
+
+                $compartments = $record->readings
+                    ->groupBy('compartment_number')
+                    ->sortKeys();
+
+                return [
+                    Grid::make()
+                        ->columns(3)
+                        ->schema(
+                            $compartments->map(function ($readings, $compartment) {
+                                return Section::make("Compartment {$compartment}")
+                                    ->collapsible()
+                                    ->schema([
+                                        ViewEntry::make("compartment_{$compartment}_readings")
+                                            ->view('filament.resources.calibrations.pages.readings-table')
+                                            ->viewData([
+                                                'readings' => $readings,
+                                                'hasWidget' => false
+                                            ])
+                                    ]);
+                            })->values()->all()
+                        )
+                ];
+            });
+    }
+
+    /**
+     * @return Section
+     */
+    public static function interpolationTabData(): Section
+    {
+        return Section::make('Interpolations')->visible(fn($record) => $record?->readings)
+            ->headerActions([
+                self::calculateInterpolations()
+            ])
+            ->collapsible()
+            ->schema(function ($record) {
+                // Group readings by compartment_no
+                if (!$record) {
+                    return [];
+                }
+
+                $compartments = $record->interpolations
+                    ->groupBy('compartment_number')
+                    ->sortKeys();
+                return [
+                    Grid::make()
+                        ->columns(3)
+                        ->schema(
+                            $compartments->map(function ($interpolations, $compartment) {
+                                return Section::make("Compartment {$compartment}")
+                                    ->collapsible()
+                                    ->schema([
+                                        ViewEntry::make("compartment_{$compartment}_interpolations")
+                                            ->view('filament.resources.calibrations.pages.interpolations-table')
+                                            ->viewData([
+                                                'interpolations' => $interpolations,
+                                                'manual' => collect(),
+                                                'hasWidget' => false
+                                            ])
+                                    ]);
+                            })->values()->all()
+                        )
+                ];
+
+            });
+    }
+
+
 }
