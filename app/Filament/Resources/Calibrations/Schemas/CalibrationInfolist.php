@@ -10,6 +10,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -44,7 +45,19 @@ class CalibrationInfolist
                                             TextEntry::make('number')->label('Compartment Number')->numeric(),
                                             TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(),
                                             TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(),
-                                        ])->columns(3)
+                                            Actions::make([
+                                                Action::make('viewReadings')
+                                                    ->label('View All Readings')
+                                                    ->icon('heroicon-o-eye')
+                                                    ->modalHeading(fn($record) => "Compartment {$record->number} - Calibration Readings")
+                                                    ->modalContent(fn($record) => view('filament.resources.calibrations.pages.readings-table', [
+                                                        'compartment' => $record,
+                                                        'readings' => $record->readings()->orderBy('volume')->get(),
+                                                    ]))
+                                                    ->modalWidth('7xl')
+                                                    ->slideOver(),
+                                            ])
+                                        ])->columns(4)
                                 ]),
                             Tab::make('Readings')
                                 ->badge(fn($record) => $record->readings->count())
