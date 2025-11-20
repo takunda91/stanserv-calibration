@@ -6,6 +6,7 @@ use App\Filament\Resources\Calibrations\CalibrationResource;
 use App\Models\Calibration;
 use App\Models\CalibrationReading;
 use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -59,6 +60,9 @@ class CalibrationReadings extends Page
             ->statePath('data')
             ->components([
                 Section::make('Calibration Header')->columns(3)
+                    ->headerActions([
+                        ViewAction::make()->color('primary')
+                    ])
                     ->schema([
                         TextEntry::make('truck_owner')->state($this->record->truck->owner_name)->label('Client'),
                         TextEntry::make('calibration_date')->state($this->record->calibration_date)->date()->label('Calibration Date'),

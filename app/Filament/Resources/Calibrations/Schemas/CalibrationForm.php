@@ -106,7 +106,7 @@ class CalibrationForm
                                 })
 
                                 // This runs after any action (add, delete, reorder)
-                                ->afterStateUpdated(function (Repeater $component, Get $get, Set $set, ?array $state) {
+                                ->afterStateUpdated(function (Repeater $component, Set $set) {
                                     $state = $component->getState();
                                     if ($state) {
                                         $keys = array_keys($state);

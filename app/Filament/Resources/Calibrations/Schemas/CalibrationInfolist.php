@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Calibrations\Schemas;
 
+use App\Enums\CalibrationStatus;
 use App\Exports\CalibrationInterpolationExport;
 use App\Filament\Resources\Calibrations\Pages\CalibrationReadings;
+use App\Models\CalibrationReading;
 use App\Services\InterpolationService;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\IconEntry;
@@ -88,10 +90,28 @@ class CalibrationInfolist
                     TextEntry::make('coupling_height_before')->default('n/a')
                         ->numeric(),
                     TextEntry::make('technicians_list')->label('Technicians'),
-                    TextEntry::make('meta.remarks')
+                    TextEntry::make('meta.remarks'),
+                    TextEntry::make('status'),
+                    TextEntry::make('complete_date')->date()->visible(fn($record) => $record->status === CalibrationStatus::completed),
+                    TextEntry::make('completedBy.name')->label('Completed By')->visible(fn($record) => $record->status === CalibrationStatus::completed),
+                    TextEntry::make('abort_date')->color('danger')->date()->visible(fn($record) => $record->status === CalibrationStatus::aborted),
+                    TextEntry::make('abortedBy.name')->color('danger')->label('Abort By')->visible(fn($record) => $record->status === CalibrationStatus::aborted),
+                    TextEntry::make('aborted_reason')->color('danger')->label('Abort Reason')->visible(fn($record) => $record->status === CalibrationStatus::aborted),
                 ])->columnSpanFull()
                 ->collapsible()
                 ->columns(3)->compact(),
+            Section::make('Completion Summary')
+                ->schema([
+                    TextEntry::make('vehicle_checked_by')->state(fn($record) => $record->vehicleCheckedBy()),
+                    TextEntry::make('calibrated_by')->state(fn($record) => $record->calibrateBy()),
+                    TextEntry::make('meter_controlled_by')->state(fn($record) => $record->meterControlledBy()),
+                    TextEntry::make('sticker_put_by')->state(fn($record) => $record->stickerPutBy()),
+
+                ])->columnSpanFull()
+                ->collapsible()
+                ->visible(fn($record) => $record->status === CalibrationStatus::completed)
+                ->columns()
+                ->compact(),
             Section::make('Permit To Work')
                 ->columns()
                 ->schema([
@@ -215,7 +235,7 @@ class CalibrationInfolist
         return Action::make('interpolation')
             ->label('Run Interpolation')
             ->color('success')
-            ->visible(fn($record) => $record->readings()->count() > 0)
+            ->visible(fn($record) => $record->readings()->count() > 0 && $record->status === CalibrationStatus::in_progress)
             ->icon(Heroicon::Plus)
             ->action(function ($record) {
 
@@ -258,7 +278,7 @@ class CalibrationInfolist
                 Action::make('readings')
                     ->label('Readings')
                     ->color('info')
-                    ->visible(fn($record) => $record->readings->count() > 0)
+                    ->visible(fn($record) => $record->readings->count() > 0 && $record->status === CalibrationStatus::in_progress)
                     ->icon(Heroicon::Plus)
                     ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]))
             ])

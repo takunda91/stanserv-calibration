@@ -22,7 +22,8 @@ class Calibration extends Model implements Auditable
         'permit_to_work' => 'array',
         'risk_assessment' => 'array',
         'precheck' => 'array',
-        'meta' => 'array'
+        'meta' => 'array',
+        'sign_off_list' => 'array',
 
     ];
 
@@ -62,6 +63,26 @@ class Calibration extends Model implements Auditable
         return $this->cachedTechniciansList;
     }
 
+    public function vehicleCheckedBy()
+    {
+        return User::find($this->sign_off_list['vehicle_checked_by'])->name ?? '';
+    }
+
+    public function stickerPutBy()
+    {
+        return User::find($this->sign_off_list['sticker_put_by'])->name ?? '';
+    }
+
+    public function meterControlledBy()
+    {
+        return User::find($this->sign_off_list['meter_controlled_by'])->name ?? '';
+    }
+
+    public function calibrateBy()
+    {
+        return User::find($this->sign_off_list['calibrated_by'])->name ?? '';
+    }
+
     public function readings(): Calibration|HasMany
     {
         return $this->hasMany(CalibrationReading::class);
@@ -75,6 +96,28 @@ class Calibration extends Model implements Auditable
     public function compartments(): Calibration|HasMany
     {
         return $this->hasMany(CalibrationCompartment::class);
+    }
+
+    public function GetUpToDateAttribute(): bool
+    {
+        if (in_array($this->status, [CalibrationStatus::pending, CalibrationStatus::aborted], true))
+        {
+            return true;
+        }
+
+         return $this->readings->count() > 0
+            && $this->interpolations->count() > 0
+            && ($this->readings->count() === $this->interpolations()->whereNotNull('calibration_reading_id')->count());
+    }
+
+    public function completedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'complete_by');
+    }
+
+    public function abortedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'abort_by');
     }
 
 }
