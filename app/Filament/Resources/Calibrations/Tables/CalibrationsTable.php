@@ -31,18 +31,7 @@ class CalibrationsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('truck.reg_info')->searchable()->sortable(),
-                TextColumn::make('technicians_list')->label('Technicians')->searchable()->sortable(),
-                TextColumn::make('calibration_date')->date()->searchable()->sortable(),
-                TextColumn::make('calibration_number')->searchable()->sortable(),
-                TextColumn::make('calibrate_using')->label('Calibration Type')->searchable()->sortable(),
-                TextColumn::make('status')->color(fn($state) => $state->color())
-                    ->formatStateUsing(fn($state) => $state->label())
-                    ->searchable()->sortable(),
-                TextColumn::make('number_of_compartments')->label('Comparts')->searchable()->state(fn($record) => $record->compartments->count())->sortable(),
-                IconColumn::make('up_to_date')->label('Check List')->boolean()
-            ])
+            ->columns(self::calibrationList())
             ->filters([
                 TrashedFilter::make(),
             ])
@@ -163,5 +152,24 @@ class CalibrationsTable
                     ->body("Calibration has been completed successfully.")
                     ->success()->send();
             });
+    }
+
+    /**
+     * @return array
+     */
+    public static function calibrationList(): array
+    {
+        return [
+            TextColumn::make('truck.reg_info')->searchable()->sortable(),
+            TextColumn::make('technicians_list')->label('Technicians')->searchable()->sortable(),
+            TextColumn::make('calibration_date')->date()->searchable()->sortable(),
+            TextColumn::make('calibration_number')->searchable()->sortable(),
+            TextColumn::make('calibrate_using')->label('Calibration Type')->searchable()->sortable(),
+            TextColumn::make('status')->color(fn($state) => $state->color())
+                ->formatStateUsing(fn($state) => $state->label())
+                ->searchable()->sortable(),
+            TextColumn::make('number_of_compartments')->label('Comparts')->searchable()->state(fn($record) => $record->compartments->count())->sortable(),
+            IconColumn::make('up_to_date')->label('Check List')->boolean()
+        ];
     }
 }
