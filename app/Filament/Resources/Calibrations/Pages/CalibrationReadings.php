@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Calibrations\Pages;
 
 use App\Filament\Resources\Calibrations\CalibrationResource;
+use App\Filament\Resources\Calibrations\Schemas\CustomActions\ImportReadings;
 use App\Models\Calibration;
 use App\Models\CalibrationReading;
 use Filament\Actions\Action;
@@ -61,7 +62,8 @@ class CalibrationReadings extends Page
             ->components([
                 Section::make('Calibration Header')->columns(3)
                     ->headerActions([
-                        ViewAction::make()->color('primary')
+                        ViewAction::make()->color('primary'),
+                        ImportReadings::make()
                     ])
                     ->schema([
                         TextEntry::make('truck_owner')->state($this->record->truck->owner_name)->label('Client'),

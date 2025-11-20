@@ -39,7 +39,7 @@ class InterpolationService
 
                 $this->persistInterpolation($calibrationId, $compartmentNumber, $loweDip, $loweVol, $compartmentReading->id, $average);
 
-                if ($numberOfGaps > 0) {
+                if ($numberOfGaps > 0 && $average > 0) {
                     $startInterDip = $loweDip;
                     $startInterVol = $loweVol;
                     for ($i = 0; $i < $numberOfGaps; $i++) {

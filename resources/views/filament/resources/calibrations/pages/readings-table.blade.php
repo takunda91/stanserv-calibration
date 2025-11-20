@@ -9,7 +9,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {{-- Manual Readings Card --}}
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Manual Readings</p>
@@ -28,7 +28,7 @@
 
             {{-- Interpolated Card --}}
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Interpolated</p>
@@ -47,7 +47,7 @@
 
             {{-- Total Points Card --}}
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Points</p>
@@ -71,51 +71,66 @@
         <thead class="divide-y divide-gray-200 dark:divide-white/5">
         <tr class="bg-gray-50 dark:bg-white/5">
             <th class="fi-ta-header-cell px-3 py-3.5 sm:first-of-type:ps-6 sm:last-of-type:pe-6 text-start">
-                <span class="text-sm font-semibold text-gray-950 dark:text-white">Height (mm)</span>
+                <span class="text-sm font-semibold text-gray-950 dark:text-white">Dip (mm)</span>
             </th>
             <th class="fi-ta-header-cell px-3 py-3.5 text-start">
                 <span class="text-sm font-semibold text-gray-950 dark:text-white">Volume (L)</span>
             </th>
             @if($hasWidget)
-            <th class="fi-ta-header-cell px-3 py-3.5 text-start">
-                <span class="text-sm font-semibold text-gray-950 dark:text-white">Recorded By</span>
-            </th>
-            <th class="fi-ta-header-cell px-3 py-3.5 text-start">
-                <span class="text-sm font-semibold text-gray-950 dark:text-white">Type</span>
-            </th>
+                <th class="fi-ta-header-cell px-3 py-3.5 text-start">
+                    <span class="text-sm font-semibold text-gray-950 dark:text-white">Recorded By</span>
+                </th>
+                <th class="fi-ta-header-cell px-3 py-3.5 text-start">
+                    <span class="text-sm font-semibold text-gray-950 dark:text-white">Type</span>
+                </th>
             @endif
         </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-white/5">
+
+        @php
+            $prev = null;
+        @endphp
+
         @foreach($readings as $reading)
-            <tr class="fi-ta-row transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {{ $reading->volume === 'interpolated' ? 'bg-blue-50 dark:bg-blue-400/10' : '' }}">
+
+            @php
+                $isLower = $prev !== null && $reading->volume <= $prev;
+            @endphp
+
+            <tr class="fi-ta-row  transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {{ $isLower  ? 'bg-purple-100'  : '' }}">
                 <td class="fi-ta-cell p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
                     <div class="px-3 py-4">
                         <span
-                            class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->dip_mm, 2) }}</span>
+                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->dip_mm, 2) }}</span>
                     </div>
                 </td>
                 <td class="fi-ta-cell p-0">
                     <div class="px-3 py-4">
                         <span
-                            class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->volume, 2) }}</span>
+                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->volume, 2) }}</span>
                     </div>
                 </td>
                 @if($hasWidget)
-                <td class="fi-ta-cell p-0">
-                    <div class="px-3 py-4">
-                        <span class="text-sm text-gray-950 dark:text-white">{{ $reading->capturedBy->name }}</span>
-                    </div>
-                </td>
-                <td class="fi-ta-cell p-0">
-                    <div class="px-3 py-4">
-                        <x-filament::badge :color="$reading->volume === 'manual' ? 'success' : 'info'">
-                            {{ ucfirst('manual') }}
-                        </x-filament::badge>
-                    </div>
-                </td>
+                    <td class="fi-ta-cell p-0">
+                        <div class="px-3 py-4">
+                            <span class="text-sm text-gray-950 dark:text-white">{{ $reading->capturedBy->name }}</span>
+                        </div>
+                    </td>
+                    <td class="fi-ta-cell p-0">
+                        <div class="px-3 py-4">
+                            <x-filament::badge :color="$reading->volume === 'manual' ? 'success' : 'info'">
+                                {{ ucfirst('manual') }}
+                            </x-filament::badge>
+                        </div>
+                    </td>
                 @endif
             </tr>
+
+            @php
+                $prev = $reading->volume;
+            @endphp
+
         @endforeach
         </tbody>
     </table>

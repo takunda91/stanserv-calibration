@@ -4,14 +4,10 @@ namespace App\Filament\Resources\Calibrations\Schemas;
 
 use App\Enums\CalibrationStatus;
 use App\Exports\CalibrationInterpolationExport;
-use App\Filament\Imports\CalibrationReadingImporter;
 use App\Filament\Resources\Calibrations\Pages\CalibrationReadings;
 use App\Filament\Resources\Calibrations\Schemas\CustomActions\ImportReadings;
-use App\Models\CalibrationReading;
 use App\Services\InterpolationService;
 use Filament\Actions\Action;
-use Filament\Actions\ImportAction;
-use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -73,9 +69,7 @@ class CalibrationInfolist
                                 ->icon(Heroicon::ShieldExclamation)
                                 ->schema([
                                     self::interpolationTabData(),
-                                ]),
-                            Tab::make('Certificate')->icon(Heroicon::Newspaper)
-                                ->schema([])
+                                ])
                         ])
                 ])->columnSpanFull()
             ]);
@@ -365,7 +359,7 @@ class CalibrationInfolist
         return Action::make('readings')
             ->label('Readings')
             ->color('info')
-            ->visible(fn($record) => $record->readings->count() > 0 && $record->status === CalibrationStatus::in_progress)
+            ->visible(fn($record) => $record->status === CalibrationStatus::in_progress)
             ->icon(Heroicon::Plus)
             ->url(fn($record) => CalibrationReadings::getUrl(['record' => $record]));
     }

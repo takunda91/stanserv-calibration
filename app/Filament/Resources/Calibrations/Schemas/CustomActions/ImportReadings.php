@@ -19,7 +19,7 @@ class ImportReadings
         return Action::make('importReadings')
             ->icon(Heroicon::DocumentArrowUp)
             ->color('primary')
-            ->visible(fn($record) => $record->readings->count() > 0 && $record->status === CalibrationStatus::in_progress)
+            ->visible(fn($record) => $record->status === CalibrationStatus::in_progress)
             ->schema([
                 Select::make('compartment_number')
                     ->label('Select Compartment')
@@ -56,6 +56,7 @@ class ImportReadings
             });
 
         } catch (\Throwable $e) {
+            \Log::error($e);
             Notification::make('note')
                 ->title('Readings Failed')
                 ->body('Readings Failed : ' . $e->getMessage())

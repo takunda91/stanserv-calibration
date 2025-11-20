@@ -17,14 +17,12 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Log;
-use RuntimeException;
 
 class CalibrationsTable
 {
@@ -160,10 +158,10 @@ class CalibrationsTable
     public static function calibrationList(): array
     {
         return [
+            TextColumn::make('calibration_number')->weight(FontWeight::Bold)->searchable()->sortable(),
             TextColumn::make('truck.reg_info')->searchable()->sortable(),
             TextColumn::make('technicians_list')->label('Technicians')->searchable()->sortable(),
             TextColumn::make('calibration_date')->date()->searchable()->sortable(),
-            TextColumn::make('calibration_number')->searchable()->sortable(),
             TextColumn::make('calibrate_using')->label('Calibration Type')->searchable()->sortable(),
             TextColumn::make('status')->color(fn($state) => $state->color())
                 ->formatStateUsing(fn($state) => $state->label())

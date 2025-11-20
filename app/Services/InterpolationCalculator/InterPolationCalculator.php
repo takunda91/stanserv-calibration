@@ -16,6 +16,9 @@ readonly class InterPolationCalculator
     {
         $dipDiff = $this->upperDipInmm - $this->lowerDipInmm;
         $volDiff = $this->upperVolLtr - $this->lowerVolLtr;
+        if($volDiff === 0) {
+            return 0.0;
+        }
         return round(($dipDiff / $volDiff) * 100, 2);
     }
 
