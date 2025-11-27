@@ -9,7 +9,9 @@ use App\Enums\TruckTypes;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Log;
 
 class TruckForm
 {
@@ -41,10 +43,12 @@ class TruckForm
                                     ->default(null),
                                 Select::make('truck_suspension_type')
                                     ->options(TruckSuspensionTypes::class)
-                                    ->default(null),
+                                    ->default(null)
+                                    ->live(),
                                 Select::make('air_bags')
                                     ->options(AirBagsConfig::class)
-                                    ->default(null),
+                                    ->default(null)
+                                    ->visible(fn(Get $get) => $get('truck_suspension_type') === TruckSuspensionTypes::AIR_BAGS)
                             ]),
                         Section::make('Truck Details')
                             ->description('Add truck data')
