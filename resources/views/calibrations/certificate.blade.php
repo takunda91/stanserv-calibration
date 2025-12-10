@@ -26,70 +26,6 @@
             margin: 0;
             padding: 0;
         }
-        .border-container {
-            padding: 0;
-            margin: 0;
-            position: relative;
-            box-sizing: border-box;
-        }
-        .stanserv-border {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .stanserv-border-text {
-            font-size: 8pt;
-            color: #ccc;
-            white-space: nowrap;
-            position: absolute;
-            font-weight: bold;
-            letter-spacing: 2px;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        /* Top Border */
-        .border-top { 
-            top: 2mm; 
-            left: 0; 
-            right: 0;
-            height: 5mm;
-        }
-        
-        /* Bottom Border */
-        .border-bottom { 
-            bottom: 2mm; 
-            left: 0; 
-            right: 0;
-            height: 5mm;
-        }
-        
-        /* Left Border */
-        .border-left { 
-            top: 0; 
-            bottom: 0; 
-            left: 2mm; 
-            width: 5mm;
-            writing-mode: vertical-rl;
-            transform: rotate(180deg); /* Flip to face content */
-        }
-        
-        /* Right Border */
-        .border-right { 
-            top: 0; 
-            bottom: 0; 
-            right: 2mm; 
-            width: 5mm;
-            writing-mode: vertical-rl;
-        }
-
         .container {
             width: 100%;
             padding: 0 15mm;
@@ -190,19 +126,7 @@
     </style>
 </head>
 <body>
-    <div class="border-container">
-        <!-- Simulated Border Text -->
-        @php
-            $borderText = str_repeat("STANSERV   ", 150); // Repeat enough to cover edges
-        @endphp
-        <div class="stanserv-border">
-            <div class="stanserv-border-text border-top">{{ $borderText }}</div>
-            <div class="stanserv-border-text border-bottom">{{ $borderText }}</div>
-            <div class="stanserv-border-text border-left">{{ $borderText }}</div>
-            <div class="stanserv-border-text border-right">{{ $borderText }}</div>
-        </div>
-
-        <div class="container">
+    <div class="container">
             <div class="watermark">STANSERV</div>
             
             <!-- Header Section -->
@@ -333,7 +257,6 @@
                     <div>Valid Until: {{ $calibration->created_at->addYears(2)->format('d/m/Y') }}</div>
                 </div>
             </div>
-        </div>
     </div>
     <script>
         window.onload = function() {
