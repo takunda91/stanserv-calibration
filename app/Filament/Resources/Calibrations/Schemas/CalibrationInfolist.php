@@ -265,6 +265,17 @@ class CalibrationInfolist
             });
     }
 
+    public static function printCertificate(): Action
+    {
+        return Action::make('printCertificate')
+            ->label('Print Certificate')
+            ->color('success')
+            ->visible(fn($record) => $record->interpolations()->count() > 0)
+            ->icon(Heroicon::OutlinedPrinter)
+            ->url(fn($record) => route('calibrations.certificate', $record))
+            ->openUrlInNewTab();
+    }
+
 
     /**
      * @return Section
@@ -316,7 +327,8 @@ class CalibrationInfolist
         return Section::make('Interpolations')->visible(fn($record) => $record?->readings)
             ->headerActions([
                 self::calculateInterpolations(),
-                self::exportInterpolations()
+                self::exportInterpolations(),
+                self::printCertificate()
             ])
             ->collapsible()
             ->schema(function ($record) {
