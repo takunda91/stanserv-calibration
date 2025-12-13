@@ -8,17 +8,17 @@
         @media print {
             @page {
                 size: A4;
-                margin-top: 25mm;
+                margin-top: 40mm; /* Larger margin for Page 2+ */
                 margin-bottom: 25mm;
                 margin-left: 10mm;
                 margin-right: 10mm;
             }
+            @page :first {
+                margin-top: 25mm; /* Keep Page 1 standard */
+            }
             body {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-            }
-            .page-number:after {
-                content: "Page " counter(page);
             }
         }
         body {
@@ -29,6 +29,18 @@
             margin: 0;
             padding: 0;
         }
+        
+        /* Fixed Page Number */
+        .page-number-container {
+            position: fixed;
+            top: -20mm; /* In the top margin area */
+            right: 0;
+            font-size: 8pt;
+        }
+        .page-number:after {
+            content: "Page " counter(page);
+        }
+
         .container {
             width: 100%;
             padding: 0 15mm;
@@ -55,7 +67,7 @@
             text-align: right;
         }
         th {
-            text-align: center;
+            text-align: center; /* Center align headers */
             background-color: #f0f0f0;
             vertical-align: middle;
         }
@@ -94,7 +106,7 @@
         }
         .seal-container {
             position: absolute;
-            bottom: 0;
+            bottom: -60mm; /* Moved down further as requested */
             right: 0;
             z-index: 5;
             opacity: 0.8;
@@ -129,6 +141,11 @@
     </style>
 </head>
 <body>
+    <!-- Fixed Page Number -->
+    <div class="page-number-container">
+        <span class="page-number"></span>
+    </div>
+
     <div class="container">
             <div class="watermark">STANSERV</div>
             
@@ -154,7 +171,7 @@
             <div style="border: 1px solid #000; padding: 5px; margin-bottom: 5mm; font-weight: bold;">
                 <div style="display: flex; justify-content: space-between;">
                     <div>TRUCK OWNER: {{ $truck->owner_name ?? 'QUEST COM LOGISTICS (Pvt) Ltd' }}</div>
-                    <div class="page-number"></div>
+                    <!-- Page number moved to fixed container -->
                 </div>
                 <div style="margin-top: 5px;">
                     TRUCK / TANKER / INTERLINK REG. No.: {{ $truck->reg_info }}
