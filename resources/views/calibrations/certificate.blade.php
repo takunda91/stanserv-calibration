@@ -8,7 +8,10 @@
         @media print {
             @page {
                 size: A4;
-                margin: 10mm;
+                margin-top: 25mm;
+                margin-bottom: 25mm;
+                margin-left: 10mm;
+                margin-right: 10mm;
             }
             body {
                 -webkit-print-color-adjust: exact;
@@ -131,6 +134,11 @@
             
             <!-- Header Section -->
             <div style="text-align: center; margin-bottom: 5mm; position: relative;">
+                <!-- QR Code -->
+                <div style="position: absolute; top: 0; right: 0;">
+                    {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->generate($calibration->calibration_number) !!}
+                </div>
+
                 <div style="font-size: 24pt; font-weight: bold; letter-spacing: 2px;">STANSERV</div>
                 <div style="font-size: 10pt; color: #666; margin-top: 2px;">
                     Stanserv Genuine Services (Pvt) Ltd. | ISO 45001: 2018 OH&S MANAGEMENT SYSTEM CERTIFIED
