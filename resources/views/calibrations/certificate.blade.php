@@ -280,14 +280,15 @@
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <div>Date: _______________</div>
+                    <div>Date: ________________________________</div>
                 </div>
-                <div class="signature-box">
+                <div class="signature-box" style="margin-top: 10px;">
                     <div class="signature-line"></div>
-                    <div>Valid Until: _______________</div>
+                    <div>Valid Until: ________________________________</div>
                 </div>
-                <div class="signature-box">
+                <div class="signature-box" style="margin-top: 20px;">
                     <div class="signature-line"></div>
+                    <div>________________________________</div>
                     <div>Authorized Signature</div>
                 </div>
             </div>
