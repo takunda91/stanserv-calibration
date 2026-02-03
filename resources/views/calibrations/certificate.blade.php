@@ -48,7 +48,8 @@
         }
 
         .footer-content {
-            font-size: 7pt;
+            font-size: 10pt; /* Increased for better visibility */
+            font-weight: bold;
             text-align: center;
             border-top: 1px solid #000;
             padding-top: 5px;
@@ -70,6 +71,12 @@
             text-align: center; /* Center align headers */
             background-color: #f0f0f0;
             vertical-align: middle;
+            font-weight: bold;
+        }
+        /* Make table data figures bold */
+        tbody td {
+            font-weight: bold !important;
+            font-family: 'Courier New', Courier, monospace;
         }
         /* Repeat header on new pages */
         thead { display: table-header-group; }
@@ -157,6 +164,7 @@
                 </div>
 
                 <div style="font-size: 24pt; font-weight: bold; letter-spacing: 2px;">STANSERV</div>
+                <div style="font-size: 12pt; font-weight: bold; margin-top: 2px;">GENUINE SERVICES</div>
                 <div style="font-size: 10pt; color: #666; margin-top: 2px;">
                     Stanserv Genuine Services (Pvt) Ltd. | ISO 45001: 2018 OH&S MANAGEMENT SYSTEM CERTIFIED
                 </div>
@@ -186,7 +194,7 @@
                             @foreach($calibration->compartments as $compartment)
                                 <th colspan="2">
                                     COMPARTMENT {{ $loop->iteration }}<br>
-                                    Ref. Height:<br>
+                                    Reference Height:<br>
                                     {{ $compartment->height > 0 ? number_format($compartment->height, 0) : 'N/A' }} mm
                                 </th>
                             @endforeach
@@ -256,6 +264,10 @@
                 <div style="font-weight: bold; margin-bottom: 20px;">
                     ALL DIP HEIGHT READINGS MUST BE TAKEN AT ALL TIMES FROM THE MARKED POSITION OF EACH MANHOLE, WITH AIRBAGS ON THE HORSE COMPLETELY EMPTY. (EXTRA CAUTION SHOULD BE TAKEN WHEN CHECKING REFERENCE HEIGHT ON COMPARTMENT NUMBER 4)
                 </div>
+                
+                <div style="font-style: italic; margin-bottom: 20px; font-size: 9pt;">
+                    The above volumes are given at reference condition of 20°C and 0 Bar Gauged Pressure.
+                </div>
             </div>
 
             <!-- Signatures -->
@@ -275,11 +287,11 @@
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <div>Date: {{ $calibration->created_at->format('d/m/Y') }}</div>
+                    <div>Date: _______________</div>
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <div>Valid Until: {{ $calibration->created_at->addYears(2)->format('d/m/Y') }}</div>
+                    <div>Valid Until: _______________</div>
                 </div>
             </div>
     </div>
