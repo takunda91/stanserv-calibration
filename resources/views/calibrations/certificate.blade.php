@@ -99,17 +99,18 @@
 
         .signatures {
             display: flex;
-            justify-content: space-between;
-            margin-top: 50px;
+            flex-direction: column; /* Stack vertically */
+            align-items: flex-start; /* Align left */
+            margin-top: 30px;
             font-size: 9pt;
             position: relative;
             page-break-inside: avoid;
         }
         .signature-box {
-            width: 30%;
-            border-top: 1px solid #000;
-            text-align: center;
+            width: 50%;
+            text-align: left;
             padding-top: 5px;
+            margin-bottom: 15px; /* Good spacing between fields */
         }
         .seal-container {
             position: absolute;
@@ -264,10 +265,6 @@
                 <div style="font-weight: bold; margin-bottom: 20px;">
                     ALL DIP HEIGHT READINGS MUST BE TAKEN AT ALL TIMES FROM THE MARKED POSITION OF EACH MANHOLE, WITH AIRBAGS ON THE HORSE COMPLETELY EMPTY. (EXTRA CAUTION SHOULD BE TAKEN WHEN CHECKING REFERENCE HEIGHT ON COMPARTMENT NUMBER 4)
                 </div>
-                
-                <div style="font-style: italic; margin-bottom: 20px; font-size: 9pt;">
-                    The above volumes are given at reference condition of 20°C and 0 Bar Gauged Pressure.
-                </div>
             </div>
 
             <!-- Signatures -->
@@ -283,16 +280,21 @@
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <div>Authorized Signature</div>
-                </div>
-                <div class="signature-box">
-                    <div class="signature-line"></div>
                     <div>Date: _______________</div>
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
                     <div>Valid Until: _______________</div>
                 </div>
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div>Authorized Signature</div>
+                </div>
+            </div>
+            
+            <!-- Reference condition statement - after signatures -->
+            <div style="font-style: italic; margin-top: 30px; font-size: 9pt; text-align: center;">
+                The above volumes are given at reference condition of 20°C and 0 Bar Gauged Pressure.
             </div>
     </div>
     <script>
