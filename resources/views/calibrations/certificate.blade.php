@@ -146,6 +146,31 @@
             z-index: -1;
             pointer-events: none;
         }
+        
+        .microtext-line {
+            position: fixed;
+            font-size: 4.5pt;
+            color: #888;
+            opacity: 0.5;
+            white-space: nowrap;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+        .microtext-top { 
+            top: 5mm; 
+            left: 10mm; 
+            right: 10mm; 
+            text-align: center; 
+        }
+        .microtext-bottom { 
+            bottom: 5mm; 
+            left: 10mm; 
+            right: 10mm; 
+            text-align: center; 
+        }
     </style>
 </head>
 <body>
@@ -156,6 +181,13 @@
 
     <div class="container">
             <div class="watermark">STANSERV</div>
+
+            <!-- Microtext Border -->
+            @php
+                $microtext = str_repeat('STANSERV GENUINE SERVICES • ', 20);
+            @endphp
+            <div class="microtext-line microtext-top">{{ $microtext }}</div>
+            <div class="microtext-line microtext-bottom">{{ $microtext }}</div>
             
             <!-- Header Section -->
             <div style="text-align: center; margin-bottom: 5mm; position: relative;">
