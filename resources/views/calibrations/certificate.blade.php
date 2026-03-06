@@ -189,27 +189,49 @@
 
             <!-- Readings Table -->
             @if($calibration->compartments->count() > 0)
-                <table>
+                @php
+                    $compartments = $calibration->compartments;
+                    $isSingleCompartment = $compartments->count() === 1;
+                @endphp
+
+                <table style="table-layout: fixed;">
                     <thead>
-                        <tr>
-                            @foreach($calibration->compartments as $compartment)
-                                <th colspan="2">
-                                    COMPARTMENT {{ $loop->iteration }}<br>
+                        @if($isSingleCompartment)
+                            @php $comp = $compartments->first(); @endphp
+                            <tr>
+                                <th colspan="4">
+                                    COMPARTMENT 1<br>
                                     Reference Height:<br>
-                                    {{ $compartment->height > 0 ? number_format($compartment->height, 0) : 'N/A' }} mm
+                                    {{ $comp->height > 0 ? number_format($comp->height, 0) : 'N/A' }} mm
                                 </th>
-                            @endforeach
-                        </tr>
-                        <tr class="subheader">
-                            @foreach($calibration->compartments as $compartment)
-                                <th>Dip<br>mm</th>
-                                <th>Volume<br>Litres</th>
-                            @endforeach
-                        </tr>
+                            </tr>
+                            <tr class="subheader">
+                                <th>Dip (mm)</th>
+                                <th>Volume (L)</th>
+                                <th style="border-left: 2px solid #000;">Dip (mm)</th>
+                                <th>Volume (L)</th>
+                            </tr>
+                        @else
+                            <tr>
+                                @foreach($compartments as $compartment)
+                                    <th colspan="2" style="{{ !$loop->first ? 'border-left: 2px solid #000;' : '' }}">
+                                        COMPARTMENT {{ $loop->iteration }}<br>
+                                        Reference Height:<br>
+                                        {{ $compartment->height > 0 ? number_format($compartment->height, 0) : 'N/A' }} mm
+                                    </th>
+                                @endforeach
+                            </tr>
+                            <tr class="subheader">
+                                @foreach($compartments as $compartment)
+                                    <th style="{{ !$loop->first ? 'border-left: 2px solid #000;' : '' }}">Dip<br>mm</th>
+                                    <th>Volume<br>Litres</th>
+                                @endforeach
+                            </tr>
+                        @endif
                     </thead>
                     <tfoot>
                         <tr>
-                            <td colspan="{{ $calibration->compartments->count() * 2 }}" style="border: none;">
+                            <td colspan="{{ $isSingleCompartment ? 4 : $compartments->count() * 2 }}" style="border: none;">
                                 <div class="footer-content">
                                     <p style="font-weight: bold; margin: 2px 0;">ALL DIP HEIGHT READINGS MUST BE TAKEN ON LEVEL GROUND</p>
                                     <p style="margin: 2px 0;">This certificate is valid for two calendar years from date of calibration provided the truck/tanker combination is as recorded above.</p>
@@ -219,24 +241,47 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @php
-                            $maxRows = $calibration->interpolations->groupBy('compartment_number')->map->count()->max() ?? 0;
-                        @endphp
-
-                        @for($i = 0; $i < $maxRows; $i++)
-                            <tr>
-                                @foreach($calibration->compartments as $compartment)
-                                    @php
-                                        $reading = $calibration->interpolations
-                                            ->where('compartment_number', $compartment->number)
-                                            ->values()
-                                            ->get($i);
-                                    @endphp
-                                    <td>{{ $reading->dip_mm ?? '' }}</td>
-                                    <td>{{ $reading->volume ?? '' }}</td>
-                                @endforeach
-                            </tr>
-                        @endfor
+                        @if($isSingleCompartment)
+                            @php
+                                $readings = $calibration->interpolations->where('compartment_number', $comp->number)->values();
+                                $totalReadings = $readings->count();
+                                $half = ceil($totalReadings / 2);
+                            @endphp
+                            @for($i = 0; $i < $half; $i++)
+                                @php
+                                    $left = $readings->get($i);
+                                    $right = $readings->get($i + $half);
+                                @endphp
+                                <tr>
+                                    <td>{{ $left ? number_format($left->dip_mm, 0) : '' }}</td>
+                                    <td>{{ $left ? number_format($left->volume, 0, '.', '') : '' }}</td>
+                                    <td style="border-left: 2px solid #000;">{{ $right ? number_format($right->dip_mm, 0) : '' }}</td>
+                                    <td>{{ $right ? number_format($right->volume, 0, '.', '') : '' }}</td>
+                                </tr>
+                            @endfor
+                        @else
+                            @php
+                                $maxRows = $calibration->interpolations->groupBy('compartment_number')->map->count()->max() ?? 0;
+                            @endphp
+                            @for($i = 0; $i < $maxRows; $i++)
+                                <tr>
+                                    @foreach($compartments as $compartment)
+                                        @php
+                                            $reading = $calibration->interpolations
+                                                ->where('compartment_number', $compartment->number)
+                                                ->values()
+                                                ->get($i);
+                                        @endphp
+                                        <td style="{{ !$loop->first ? 'border-left: 2px solid #000;' : '' }}">
+                                            {{ $reading ? number_format($reading->dip_mm, 0) : '' }}
+                                        </td>
+                                        <td>
+                                            {{ $reading ? number_format($reading->volume, 0, '.', '') : '' }}
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endfor
+                        @endif
                     </tbody>
                 </table>
             @endif
