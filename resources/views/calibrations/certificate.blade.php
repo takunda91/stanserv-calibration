@@ -231,7 +231,7 @@
                         @if($isSingleCompartment)
                             @php $comp = $compartments->first(); @endphp
                             <tr>
-                                <th colspan="6">
+                                <th colspan="8">
                                     COMPARTMENT 1<br>
                                     Reference Height:<br>
                                     {{ $comp->height > 0 ? number_format($comp->height, 0) : 'N/A' }} mm
@@ -239,6 +239,8 @@
                             </tr>
                             <tr class="subheader">
                                 <th>Dip (mm)</th>
+                                <th>Volume (L)</th>
+                                <th style="border-left: 2px solid #000;">Dip (mm)</th>
                                 <th>Volume (L)</th>
                                 <th style="border-left: 2px solid #000;">Dip (mm)</th>
                                 <th>Volume (L)</th>
@@ -265,7 +267,7 @@
                     </thead>
                     <tfoot>
                         <tr>
-                            <td colspan="{{ $isSingleCompartment ? 6 : $compartments->count() * 2 }}" style="border: none;">
+                            <td colspan="{{ $isSingleCompartment ? 8 : $compartments->count() * 2 }}" style="border: none;">
                                 <div class="footer-content">
                                     <p style="font-weight: bold; margin: 2px 0;">ALL DIP HEIGHT READINGS MUST BE TAKEN ON LEVEL GROUND</p>
                                     <p style="margin: 2px 0;">This certificate is valid for two calendar years from date of calibration provided the truck/tanker combination is as recorded above.</p>
@@ -279,13 +281,14 @@
                             @php
                                 $readings = $calibration->interpolations->where('compartment_number', $comp->number)->values();
                                 $totalReadings = $readings->count();
-                                $third = ceil($totalReadings / 3);
+                                $quarter = ceil($totalReadings / 4);
                             @endphp
-                            @for($i = 0; $i < $third; $i++)
+                            @for($i = 0; $i < $quarter; $i++)
                                 @php
                                     $col1 = $readings->get($i);
-                                    $col2 = $readings->get($i + $third);
-                                    $col3 = $readings->get($i + ($third * 2));
+                                    $col2 = $readings->get($i + $quarter);
+                                    $col3 = $readings->get($i + ($quarter * 2));
+                                    $col4 = $readings->get($i + ($quarter * 3));
                                 @endphp
                                 <tr>
                                     <td>{{ $col1 ? number_format($col1->dip_mm, 0) : '' }}</td>
@@ -294,6 +297,8 @@
                                     <td>{{ $col2 ? number_format($col2->volume, 0, '.', '') : '' }}</td>
                                     <td style="border-left: 2px solid #000;">{{ $col3 ? number_format($col3->dip_mm, 0) : '' }}</td>
                                     <td>{{ $col3 ? number_format($col3->volume, 0, '.', '') : '' }}</td>
+                                    <td style="border-left: 2px solid #000;">{{ $col4 ? number_format($col4->dip_mm, 0) : '' }}</td>
+                                    <td>{{ $col4 ? number_format($col4->volume, 0, '.', '') : '' }}</td>
                                 </tr>
                             @endfor
                         @else
