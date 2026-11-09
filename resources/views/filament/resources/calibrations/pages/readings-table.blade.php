@@ -102,13 +102,13 @@
                 <td class="fi-ta-cell p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
                     <div class="px-3 py-4">
                         <span
-                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->dip_mm, 2) }}</span>
+                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->dip_mm, 2, '.', ' ') }}</span>
                     </div>
                 </td>
                 <td class="fi-ta-cell p-0">
                     <div class="px-3 py-4">
                         <span
-                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->volume, 2) }}</span>
+                                class="text-sm text-gray-950 dark:text-white">{{ number_format($reading->volume, 2, '.', ' ') }}</span>
                     </div>
                 </td>
                 @if($hasWidget)
