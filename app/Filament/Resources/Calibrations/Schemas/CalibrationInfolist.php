@@ -46,8 +46,8 @@ class CalibrationInfolist
                                         ->hiddenLabel()->columnSpanFull()
                                         ->schema([
                                             TextEntry::make('number')->label('Compartment #')->numeric(),
-                                            TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(),
-                                            TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(),
+                                            TextEntry::make('starting_volume')->label('Starting Volume (L)')->numeric(thousandsSeparator: ' '),
+                                            TextEntry::make('capacity')->label('Max Capacity (L)')->numeric(thousandsSeparator: ' '),
                                             IconEntry::make('is_updated')->label('Readings Processed')->state(fn($record) => $record->is_read_same_as_interpolated)->boolean(),
                                             Actions::make([
                                                 self::generateReadingsAction(),
@@ -86,7 +86,7 @@ class CalibrationInfolist
                     TextEntry::make('calibration_date')
                         ->date(),
                     TextEntry::make('coupling_height_before')->default('n/a')
-                        ->numeric(),
+                        ->numeric(thousandsSeparator: ' '),
                     TextEntry::make('technicians_list')->label('Technicians'),
                     TextEntry::make('meta.remarks'),
                     TextEntry::make('status'),
